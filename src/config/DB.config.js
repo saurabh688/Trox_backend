@@ -1,6 +1,6 @@
 module.exports = {
-    HOST_LOCAL: "localhost",
-    USER_LOCAL: "root",
+    HOST_LOCAL: "107.21.67.243",
+    USER_LOCAL: "trox",
     PASSWORD_LOCAL: "Password_123_!",
     DB_LOCAL: "trox",
 
