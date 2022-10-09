@@ -4,9 +4,9 @@ module.exports = {
     PASSWORD_LOCAL: "Password_123_!",
     DB_LOCAL: "trox",
 
-    HOST_STAGE: "",
-    USER_STAGE: "",
-    PASSWORD_STAGE: "",
+    HOST_STAGE: "107.21.67.243",
+    USER_STAGE: "trox",
+    PASSWORD_STAGE: "Password_123_!",
     DB_STAGE: "trox",
 
     HOST_PROD: "",
