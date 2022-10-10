@@ -9,7 +9,10 @@ const ErrorMessage = {
         Error_7: 'Sorry could not update product details!',
         Error_8: 'No product found!',
         Error_9: 'Cannot delete without product ID!',
-        Error_10: 'Sorry could not delete product!'
+        Error_10: 'Sorry could not delete product!',
+        Error_11: 'Cannot view without product ID!',
+        Error_12: 'Search query cannot be null or undefined!',
+        Error_13: 'Searched products not found!'
     },
     User_Error: {
         Error_1: 'Please enter your email ID!',

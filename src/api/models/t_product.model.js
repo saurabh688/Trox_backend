@@ -39,7 +39,7 @@ const Product = sequelize.define('Product', {
         type: REAL,
         trim: true
     },
-    shippingCostStandard:{
+    shippingCostStandard: {
         type: REAL,
         trim: true
     },
@@ -76,7 +76,7 @@ const Product = sequelize.define('Product', {
             this.setDataValue('productGroupImageUrl', val.join(','));
         }
     }, // Array of strings eg: ["https://imageurlindex1", "https:"imageurlindex2"]
-    
+
     videoUrl: {
         type: STRING,
         trim: true,
@@ -90,47 +90,47 @@ const Product = sequelize.define('Product', {
             this.setDataValue('videoUrl', val.join(','));
         }
     }, // Array of strings
-    
+
     material: {
         type: STRING,
         trim: true
     }, // Array of strings
-    
+
     lengthUnit: {
         type: STRING,
         trim: true
     }, // Array of strings
-    
+
     widthUnit: {
         type: STRING,
         trim: true
     }, // Array of strings
-    
-    price: { 
-        type: REAL, 
-        trim: true, 
-        allowNull: false 
+
+    price: {
+        type: REAL,
+        trim: true,
+        allowNull: false
     }, // Array of float value  eg: [20.90, 21.30, 33.00 ...]
-    
-    color: { 
-        type: STRING 
+
+    color: {
+        type: STRING
     }, // Array of strings eg: ["Red", "Blue", "Black"]
-    
-    size: { 
-        type: STRING, 
-        trim: true 
+
+    size: {
+        type: STRING,
+        trim: true
     },
-    
-    quantity: { 
-        type: INTEGER, 
-        allowNull: false 
+
+    quantity: {
+        type: INTEGER,
+        allowNull: false
     }, // Array of Numbers eg: [25, 35, 45...]
-    
-    listingStatus: { 
-        type: STRING, 
-        allowNull: false 
+
+    listingStatus: {
+        type: STRING,
+        allowNull: false
     }, // Array of strings eg: ["Live", "Live"]
-    
+
     isDeleted: {
         type: BOOLEAN,
         defaultValue: false
@@ -140,7 +140,14 @@ const Product = sequelize.define('Product', {
     },
     updatedBy: {
         type: STRING
-    }
+    },
+}, {
+    indexes: [
+        {
+            unique: true,
+            fields: ['title', 'description', 'brand']
+        }
+    ]
 });
 
 module.exports = Product;
