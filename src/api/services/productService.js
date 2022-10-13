@@ -116,8 +116,10 @@ const verifyIfProductExist = async (productID) => {
         // * search product in the table if exist or has not been deleted.
         let productExist = await Product.findOne({
             where: {
-                id: productID,
-                isDeleted: false
+                [Op.and]: [
+                    {id: productID},
+                    {isDeleted: false}
+                ]
             }
         })
 
@@ -217,6 +219,42 @@ const deleteExistingProduct = async (updateData, productId) => {
     }
 };
 
+// * Function to search for product details using productId.
+const getProductDetailsThroughId = async (productId) => {
+    try {
+        let searchProduct = await Product.findOne({
+            where: {
+                [Op.and]: [
+                    { id: productId },
+                    { isDeleted: false }
+                ]
+            }
+        });
+
+        console.log("Date:", new Date(), "Product details from DB:", searchProduct);
+
+        // * if product does not exist return failure message.
+        if (searchProduct == null)
+            return {
+                success: false,
+                message: 'Products does not exist!'
+            }
+
+        let productDetail = searchProduct.dataValues;
+        return {
+            success: true,
+            message: 'Product details for provided product Id found!',
+            data: productDetail
+        }
+    }
+    catch (error) {
+        return {
+            success: false,
+            message: error
+        }
+    }
+}
+
 // ! Function to view all products present.
 const viewAllProductService = async () => {
     try {
@@ -291,6 +329,26 @@ const viewProductPaginationService = async (currentPage) => {
         }
     }
 }
+
+// ! Function to view specific product details.
+const viewProductDetailsService = async (productId) => {
+    try {
+        if (!productId) return {
+            success: false,
+            message: 'Cannot view without product ID!'
+        }
+
+        let productDetails = await getProductDetailsThroughId(productId);
+
+        return productDetails;
+    }
+    catch (error) {
+        return {
+            success: false,
+            message: error
+        }
+    }
+};
 
 // ! Function to add list of products
 const addProductService = async (listOfProductDetails) => {
@@ -445,10 +503,58 @@ const deleteProductService = async (productId) => {
     }
 }
 
+// ! Function to search products.
+const searchProductService = async (value) => {
+    try {
+        if (value == null || value == undefined) return {
+            success: false,
+            message: 'Search query cannot be null or undefined!'
+        }
+
+        let searchProducts = await Product.findAll({
+            where: {
+                [Op.and]: [
+                    {
+                        [Op.or]: [
+                            { title: { [Op.like]: `%${value}%` } },
+                            { description: { [Op.like]: `%${value}%` } },
+                            { brand: { [Op.like]: `%${value}%` } }
+                        ]
+                    },
+                    {
+                        isDeleted: false
+                    }
+                ]
+            },
+            order: [['title', 'ASC'], ['description', 'ASC'], ['brand', 'ASC']]
+        });
+
+        if (searchProducts.length == 0) return {
+            success: false,
+            message: 'Searched products not found!'
+        }
+
+        let productList = searchProducts.map(product => product.dataValues);
+        return {
+            success: true,
+            message: 'Searched products found',
+            data: productList
+        }
+    }
+    catch (error) {
+        return {
+            success: false,
+            message: error
+        }
+    }
+} 
+
 module.exports = {
     viewAllProductService,
     viewProductPaginationService,
+    viewProductDetailsService,
     addProductService,
     updateProductService,
-    deleteProductService
+    deleteProductService,
+    searchProductService
 };

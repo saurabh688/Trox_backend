@@ -33,7 +33,7 @@ app.use(cors(corsOption));
 
 // * Body parser => required to parse incoming request bodies in a middleware before handled by the server.
 
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true }));
 
 // Todo: Test DB initialization
@@ -60,6 +60,6 @@ app.use(API_VERSION, productRouter);
 // * Use PORT to establish connection with the server.
 app.listen(PORT, () => {
     console.log("**************************************")
-    console.log(`  Server is running on port ${PORT}  `)
+    console.log(`  Server is running on port ${PORT} `)
     console.log("**************************************")
 });
