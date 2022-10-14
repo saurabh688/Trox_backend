@@ -1,1 +1,1 @@
-Welcome to Trox server!!!
+Welcome to Trox server!!
