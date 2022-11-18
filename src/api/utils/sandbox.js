@@ -23,8 +23,8 @@ for (let index = 2000; index <= 4000; index++) {
     objectList.push({...obj, "title":obj.title, "description":obj.description, "price":obj.price});
 }
 
-console.log(objectList);
-let objectString = JSON.stringify(objectList);
-fs.writeFile("testData.json", objectString, function(err, result){
-    if(err) console.log("Error:", err);
-});
+// console.log(objectList);
+// let objectString = JSON.stringify(objectList);
+// fs.writeFile("testData.json", objectString, function(err, result){
+//     if(err) console.log("Error:", err);
+// });

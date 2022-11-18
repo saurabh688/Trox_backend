@@ -9,26 +9,30 @@ const UserAuth = sequelize.define('UserAuth', {
         primaryKey: true,
         allowNull: false
     },
+    userId: {
+        type: STRING,
+        allowNull: false
+    },
     phoneNumber: {
         type: STRING
     },
-    emailAddress: {
+    emailID: {
         type: STRING,
         allowNull: false,
         validate: {
             isEmail: true
         }
     },
+    salt: {
+        type: STRING
+    },
     password: {
         type: STRING
     },
-    reset_password: {
+    uniqueToken: {
         type: STRING
     },
-    unique_token: {
-        type: STRING
-    },
-    user_type: {
+    userType: {
         type: STRING,
         allowNull: false
     },

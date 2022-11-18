@@ -9,41 +9,87 @@ const User = sequelize.define("User", {
         primaryKey: true,
         allowNull: false
     },
-    name: {
-        type: STRING
-    },
-    phoneNumber: {
-        type: STRING
-    },
     emailID: {
         type: STRING,
         allowNull: false,
         validate: {
             isEmail: true,
-        }
+        },
+        trim: true
     },
-    password: {
-        type: STRING
+    firstName: {
+        type: STRING,
+        trim: true
     },
-    resetPassword: {
-        type: STRING
+    lastName: {
+        type: STRING,
+        trim: true
     },
-    uniqueToken: {
-        type: STRING
+    phoneNumber: {
+        type: STRING,
+        trim: true
     },
-    address: {
+    countryCode: {
+        type: STRING,
+        trim: true
+    },
+    storeName: {
+        type: STRING,
+        trim: true
+    },
+    address1: {
+        type: STRING,
+        trim: true
+    },
+    address2: {
+        type: STRING,
+        trim: true
+    },
+    city: {
+        type: STRING,
+        trim: true
+    },
+    state: {
+        type: STRING,
+        trim: true
+    },
+    country: {
         type: STRING
     },
     zip: {
-        type: INTEGER
+        type: INTEGER,
     },
-    isDeleted: {
+    governmentId: {
+        type: STRING
+    },
+    stripeAccount: {
+        type: STRING,
+        trim: true
+    },
+    companyName: {
+        type: STRING
+    },
+    websiteUrl: {
+        type: STRING
+    },
+    termsAndCondition: {
+        type: BOOLEAN
+    },
+    userType: {
+        type: STRING,
+        allowNull: false
+    },
+    isF2A: {
         type: BOOLEAN,
         defaultValue: false
     },
     status: {
         type: STRING,
         defaultValue: 'inactive'
+    },
+    isDeleted: {
+        type: BOOLEAN,
+        defaultValue: false
     },
     createdBy: {
         type: STRING

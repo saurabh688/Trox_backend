@@ -19,7 +19,21 @@ const ErrorMessage = {
         Error_2: 'Please enter your password!',
         Error_3: 'You are not registered with us. Please sign up with Trox!',
         Error_4: 'Could not update user!',
-        Error_5: 'User not found!'
+        Error_5: 'User not found!',
+        Error_6: "Please enter required fields for user sign-up, 'firstName', 'lastName', 'phoneNumber', 'emailID', 'password', 'userType'!",
+        Error_7: 'Password length must be at least 8 characters!',
+        Error_8: 'You are already registered with us. Please login to enter Trox!',
+        Error_9: 'Phone number is already registered!',
+        Error_10: 'Email Address is already registered!',
+        Error_11: 'Not Registered!',
+        Error_12: 'Invalid authorization token!'
+    },
+    Cart_Error: {
+        Error_1: "Cart Data missing, Required data: 'title', 'description', 'userId', 'price', 'quantity', 'listingStatus'",
+        Error_2: 'Could not add to cart!',
+        Error_3: 'Logged in user does not have cart!',
+        Error_4: 'Price cannot be zero should be a real number!',
+        Error_5: 'Sorry could not update cart!'
     }
 }
 

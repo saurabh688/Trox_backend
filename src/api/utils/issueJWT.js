@@ -1,7 +1,9 @@
 const jsonwebtoken = require('jsonwebtoken');
 const fs = require('fs');
-// const PRIV_KEY = fs.readFileSync('private.pem', {encoding: "utf8"});
-const { SALT } = require('../../config/constants/Constants');
+const path = require('path');
+const pathToKey = path.join('src/api/utils', '/', 'privateKey.pem');
+// const pathToKey = path.join('.', '/', 'privateKey.pem');
+const PRIV_KEY = fs.readFileSync(pathToKey, {encoding: "utf-8"});
 
 const issueJWT = (userID) => {
     const expiresIn = '1d';
@@ -11,39 +13,40 @@ const issueJWT = (userID) => {
         time: Date.now()
     };
 
-    // const options = { expiresIn: expiresIn, algorithm: 'RS256' }
-    const options = { expiresIn: expiresIn }
+    const options = { expiresIn: expiresIn, algorithm: 'RS256' }
 
     console.log("Date:", new Date(), "Payload: ", payload);
 
-    const signedToken = jsonwebtoken.sign(payload, SALT, options);
+    const signedToken = jsonwebtoken.sign(payload, PRIV_KEY, options);
 
     return {
-        token: "Bearer" + signedToken,
+        token: "Bearer:" + signedToken,
         expires: expiresIn
     };
 };
 
 const issueRefreshToken = (id, uniqueToken) => {
-    const expiresIn = '1y';
+    const expiresIn = '1 year';
 
     const payload = {
         userID: id,
         userAuthToken: uniqueToken
     };
 
-    // const options = { expiresIn: expiresIn, algorithm: 'RS256' }
-    const options = { expiresIn: expiresIn  }
+    const options = { expiresIn: expiresIn, algorithm: 'RS256' }
 
     console.log("Date:", new Date(), "Payload:", payload);
 
-    const signedToken = jsonwebtoken.sign(payload, SALT, options);
+    const signedToken = jsonwebtoken.sign(payload, PRIV_KEY, options);
 
     return {
-        token: "Bearer " + signedToken,
+        token: "Bearer:" + signedToken,
         expires: expiresIn
     };
 };
+
+// console.log("Issue JWT:", issueJWT('abcdefghijklmnopqrstuvwxyz'));
+// console.log("Issue Refresh token:", issueRefreshToken());
 
 module.exports = {
     issueJWT,

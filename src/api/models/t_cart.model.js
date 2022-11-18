@@ -1,8 +1,8 @@
-const { UUID, UUIDV4, STRING, BOOLEAN, REAL, INTEGER, TEXT, ARRAY } = require('sequelize');
+const { UUID, UUIDV4, STRING, BOOLEAN, REAL, INTEGER } = require('sequelize');
 
 const sequelize = require('../db/db');
 
-const Product = sequelize.define('Product', {
+const Cart = sequelize.define('Cart', {
     id: {
         type: UUID,
         defaultValue: UUIDV4,
@@ -113,17 +113,35 @@ const Product = sequelize.define('Product', {
     }, // Array of float value  eg: [20.90, 21.30, 33.00 ...]
 
     color: {
-        type: STRING
+        type: STRING,
+        get() {
+            if (this.getDataValue('color') != null) {
+                return this.getDataValue('color').split(',')
+            }
+            return null
+        },
+        set(val) {
+            this.setDataValue('color', val.join(','));
+        }
     }, // Array of strings eg: ["Red", "Blue", "Black"]
 
     size: {
         type: STRING,
-        trim: true
+        trim: true,
+        get() {
+            if (this.getDataValue('size') != null) {
+                return this.getDataValue('size').split(',')
+            }
+            return null
+        },
+        set(val) {
+            this.setDataValue('size', val.join(','));
+        }
     },
 
     quantity: {
         type: INTEGER,
-        allowNull: false
+        allowNull: false,
     }, // Array of Numbers eg: [25, 35, 45...]
 
     listingStatus: {
@@ -135,12 +153,24 @@ const Product = sequelize.define('Product', {
         type: STRING,
         trim: true
     },
-    
+
     parentSKU: {
         type: STRING,
         trim: true
     },
 
+    selectedSize: {
+        type: STRING,
+        trim: true
+    },
+    selectedColor: {
+        type: STRING,
+        trim: true
+    },
+    totalPrice: {
+        type: REAL,
+        trim: true
+    },
     isDeleted: {
         type: BOOLEAN,
         defaultValue: false
@@ -151,13 +181,8 @@ const Product = sequelize.define('Product', {
     updatedBy: {
         type: STRING
     },
-}, {
-    indexes: [
-        {
-            unique: true,
-            fields: ['title', 'description', 'brand']
-        }
-    ]
 });
 
-module.exports = Product;
+module.exports = Cart;
+
+// selectedSize, selectedColor, totalPrice, totalSellPrice, quantity

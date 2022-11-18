@@ -2,9 +2,12 @@ const { Op } = require('sequelize');
 const randomToken = require('rand-token');
 
 const User = require('../models/t_user.model');
-const generateHash = require('../utils/generateHash');
+const UserAuth = require('../models/t_users_auth.model');
+const comparePassword = require('../utils/comparePassword');
+
 // Todo: issue JWT, refreshToken
 const { issueJWT, issueRefreshToken } = require('../utils/issueJWT'); 
+
 // Todo: decode JWT.
 const { decodeRefreshToken } = require('../utils/decodeJWT');
 
@@ -32,26 +35,40 @@ const functionToVerifyRequiredDetails = (emailID, password) => {
     }
 }
 
-const validateRegisteredUser = async (emailID, hashedPassword) => {
+const validateRegisteredUser = async (emailID, password) => {
     try {
-        let userDetails = await User.findOne({
+        let userAuthDetails = await UserAuth.findOne({
             where: {
-                [Op.and]: [{
-                    emailID: emailID
-                }, {
-                    password: hashedPassword
-                }]
+                emailID: emailID
             }
         });
 
-        console.log('Date:', new Date(), 'searched user details:', userDetails)
+        console.log('Date:', new Date(), 'searched user auth details:', userAuthDetails);
 
-        if (!userDetails)
+        if (!userAuthDetails) return {
+            success: false,
+            message: 'You are not registered with us. Please sign up with Trox!'
+        }
+
+        const hashedPassword = userAuthDetails.dataValues.password;
+
+        let validatePassword = await comparePassword(password, hashedPassword);
+        console.log('Date:', new Date(), 'Validate password:', validatePassword);
+
+        if (!validatePassword.success) return validatePassword;
+
+        let userId = userAuthDetails.dataValues.userId;
+
+        let userDetails = await User.findByPk(userId);
+
+        console.log('Date:', new Date(), 'user details:', userDetails);
+
+        if (!userDetails) {
             return {
                 success: false,
                 message: 'You are not registered with us. Please sign up with Trox!'
             }
-
+        }
         return {
             success: true,
             message: 'User is registered!',
@@ -141,11 +158,7 @@ const userSignInService = async (userData) => {
 
         console.log('Date:', new Date(), '-------------> Next step <-------------');
 
-        let hashedPassword = await generateHash(password);
-
-        console.log('Date:', new Date(), 'Hashed password from userSignIn function:', hashedPassword);
-
-        let verifyIfRegistered = await validateRegisteredUser(emailID, hashedPassword);
+        let verifyIfRegistered = await validateRegisteredUser(emailID, password);
 
         console.log('Date:', new Date(), 'Registered user details:', verifyIfRegistered);
 
