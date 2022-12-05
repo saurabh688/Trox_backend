@@ -52,10 +52,12 @@ const functionToGetCartDetailsOfUser = async (loggedInUserID) => {
             message: 'Logged in user does not have cart!'
         };
 
+        let cartListData = cartList.map(cart => cart.dataValues);
+
         return {
             success: true,
             message: 'Cart list found!',
-            data: cartList.dataValues
+            data: cartListData
         };
     }
     catch (error) {
@@ -110,10 +112,10 @@ const functionToCalculateTotalPrice = (price, quantity) => {
 const functionToCreateUpdateData = (cartData) => {
     let { price, quantity, isDeleted } = cartData;
 
-    if (!isDeleted && !price) {
+    if (!price || !quantity) {
         return {
             success: false,
-            message: "Price cannot be zero should be a real number!"
+            message: "Price and quantity cannot be zero should be a real number!"
         }
     }
 
@@ -149,35 +151,34 @@ const functionToCreateUpdateData = (cartData) => {
     };
 };
 
-// const functionToDeleteIds = async (listOfCartId, loggedInUserId) => {
-//     try {
-//         let deleteListOfId = await Cart.destroy({
-//             where: {
-//                 [Op.and]: [
-//                     {
-//                         id: listOfCartId
-//                     },
-//                     {
-//                         userId: loggedInUserId
-//                     }
-//                 ]
-//             }
-//         });
+const functionToDeleteCartItem = async (cartId) => {
+    try {
+        let deleteItem = await Cart.destroy({
+            where: {
+                id: cartId
+            },
+            returning: true
+        });
 
-//         console.log('Date:', new Date(), 'Delete list of Id:', deleteListOfId);
+        console.log('Date:', new Date(), 'Response of delete cart item:', deleteItem);
 
-//         return {
-//             success: true,
-//             message: ''
-//         }
-//     }
-//     catch (error) {
-//         return {
-//             success: false,
-//             message: error
-//         };
-//     };
-// };
+        if (!deleteItem) return {
+            success: false,
+            message: 'Sorry could not delete the item!'
+        };
+
+        return {
+            success: true,
+            message: 'Item Deleted!'
+        }
+    }
+    catch (error) {
+        return {
+            success: false,
+            message: error
+        }
+    }
+}
 
 const addCartService = async (authorizationToken, cartData) => {
     try {
@@ -193,13 +194,13 @@ const addCartService = async (authorizationToken, cartData) => {
         }
 
         let verifyCartData = validateCartDetails(newCartData);
-        console.log('Date:', new Date(), 'verified cart objects:', verifyCartData);
+        console.log('Date:', new Date(), 'verified cart object:', verifyCartData);
         
         if (!verifyCartData.success) return verifyCartData;
 
         let verifiedData = {
             ...verifyCartData.data,
-            totalPrice: functionToCalculateTotalPrice(verifiedData.data.price , verifiedData.data.quantity)
+            totalPrice: functionToCalculateTotalPrice(verifyCartData.data.price, verifyCartData.data.quantity)
         };
 
         let addToCart = await functionToAddCartData(verifiedData);
@@ -266,28 +267,28 @@ const updateCartService = async (authorizationToken, cartId, cartData) => {
     }
 }
 
-// const deleteCartService = async (authorizationToken, listOfCartId) => {
-//     try {
-//         let loggedInUser = await validateLoggedInUser(authorizationToken);
-//         console.log("Date:", new Date(), 'Response of validate logged in user:', loggedInUser);
+const deleteCartService = async (authorizationToken, cartId) => {
+    try {
+        let loggedInUser = await validateLoggedInUser(authorizationToken);
+        console.log("Date:", new Date(), 'Response of validate logged in user:', loggedInUser);
 
-//         if (!loggedInUser.success) return loggedInUser;
+        if (!loggedInUser.success) return loggedInUser;
 
-//         let loggedInUserId = loggedInUser.data;
+        let deleteCartItem = await functionToDeleteCartItem(cartId);
 
-
-//     }
-//     catch (error) {
-//         return {
-//             success: false,
-//             message: error
-//         }
-//     }
-// }
+        return deleteCartItem;
+    }
+    catch (error) {
+        return {
+            success: false,
+            message: error
+        }
+    }
+}
 
 module.exports = {
     addCartService,
     viewCartService,
     updateCartService,
-    // deleteCartService
+    deleteCartService
 };

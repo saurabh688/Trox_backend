@@ -9,7 +9,7 @@ const PUB_KEY = fs.readFileSync(pathToKey, 'utf-8');
 const decodeJWT = (header) => {
     console.log("Date:", new Date(), "Header from User service: ", header);
 
-    const jwtToken = header.split(":")[1];
+    const jwtToken = header.split(" ")[1];
     console.log("Date:", new Date(), "Token: ", jwtToken);
 
     const loggedInUserID = jwt.verify(jwtToken, PUB_KEY, { algorithms: ['RS256'] }, (err, payload) => {
@@ -17,7 +17,7 @@ const decodeJWT = (header) => {
             console.log("Date:", new Date(), "Error:", err);
             return null;
         } else {
-            const id = payload.sub;
+            const id = payload.userID;
             console.log("Date:", new Date(), "Decoded value: ", payload);
             console.log("Date:", new Date(), "ID:", id);
             return id;

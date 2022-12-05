@@ -2,7 +2,7 @@ const bcrypt = require('bcryptjs');
 
 const comparePassword = async (plainText, hashedPassword) => {
     try {
-        let response = bcrypt.compare(plainText, hashedPassword);
+        let response = await bcrypt.compare(plainText, hashedPassword);
 
         console.log('Date:', new Date(), 'Comparing password:', response);
 

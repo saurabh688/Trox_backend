@@ -13,6 +13,8 @@ const validateLoggedInUser = async (authorizationToken) => {
             message: 'Invalid authorization token!'
         };
 
+        console.log('Date:', new Date(), 'Id:', loggedInUserId);
+
         let userDetails = await User.findByPk(loggedInUserId);
 
         if (!userDetails) return {

@@ -15,7 +15,8 @@ const options = {
 };
 
 const strategy = new Strategy(options, (payload, done) => {
-    User.findOne({ where: { id: payload.sub } })
+    console.log('Date:', new Date(), 'Payload:', payload.userID)
+    User.findOne({ where: { id: payload.userID } })
         .then(user => {
             if (user) {
                 return done(null, user);

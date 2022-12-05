@@ -32,8 +32,16 @@ const ErrorMessage = {
         Error_1: "Cart Data missing, Required data: 'title', 'description', 'userId', 'price', 'quantity', 'listingStatus'",
         Error_2: 'Could not add to cart!',
         Error_3: 'Logged in user does not have cart!',
-        Error_4: 'Price cannot be zero should be a real number!',
-        Error_5: 'Sorry could not update cart!'
+        Error_4: 'Price and quantity cannot be zero should be a real number!',
+        Error_5: 'Sorry could not update cart!',
+        Error_6: 'Sorry could not delete the item!'
+    },
+    Order_Error: {
+        Error_1: "Please provide all required details, required details: 'Seller ID', 'Shipping Address', 'Total Price', 'Total Seller Amount'",
+        Error_2: "Total price should be a real number!",
+        Error_3: "Total seller amount should be a real number!",
+        Error_4: "Could not create order!",
+        Error_5: "Could not find the order for the user!"
     }
 }
 

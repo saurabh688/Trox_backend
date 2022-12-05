@@ -20,7 +20,7 @@ const issueJWT = (userID) => {
     const signedToken = jsonwebtoken.sign(payload, PRIV_KEY, options);
 
     return {
-        token: "Bearer:" + signedToken,
+        token: "Bearer " + signedToken,
         expires: expiresIn
     };
 };
@@ -40,7 +40,7 @@ const issueRefreshToken = (id, uniqueToken) => {
     const signedToken = jsonwebtoken.sign(payload, PRIV_KEY, options);
 
     return {
-        token: "Bearer:" + signedToken,
+        token: "Bearer " + signedToken,
         expires: expiresIn
     };
 };

@@ -83,21 +83,43 @@ const validateRegisteredUser = async (emailID, password) => {
     }
 }
 
-const functionToUpdateUser = async (updateData, emailID, password) => {
+const functionToReturnUpdatedUser = async (userId) => {
+    try {
+        const returnUpdatedUser = await User.findOne({ where: { id: userId } });
+
+        console.log('Date:', new Date(), 'Returned updated data:', returnUpdatedUser);
+
+        if (!returnUpdatedUser)
+            return {
+                success: false,
+                message: 'User not found!'
+            }
+
+        return {
+            success: true,
+            message: 'User with the provided unique token found!',
+            data: returnUpdatedUser.dataValues
+        };
+    }
+    catch (error) {
+        return {
+            success: false,
+            message: error
+        };
+    }
+}
+
+const functionToUpdateUser = async (updateData, userId) => {
     try {
         const updateUser = await User.update(updateData, {
             returning: true,
             where: {
-                [Op.and]: [{
-                    emailID: emailID
-                }, {
-                    password: password
-                }]
+                id: userId
             }
         });
 
         if (updateUser[1] > 0) {
-            const verifyUpdatedUser = await functionToReturnUpdatedUser(updateData.uniqueToken);
+            const verifyUpdatedUser = await functionToReturnUpdatedUser(userId);
 
             console.log('Date:', new Date(), 'Data return from function to return updated user:', verifyUpdatedUser);
 
@@ -120,29 +142,6 @@ const functionToUpdateUser = async (updateData, emailID, password) => {
         }
     }
 };
-
-const functionToReturnUpdatedUser = async (uniqueToken) => {
-    try {
-        const returnUpdatedUser = await User.findOne({ where: { uniqueToken: uniqueToken } });
-        if (!returnUpdatedUser)
-            return {
-                success: false,
-                message: 'User not found!'
-            }
-
-        return {
-            success: true,
-            message: 'User with the provided unique token found!',
-            data: returnUpdatedUser.dataValues
-        };
-    }
-    catch (error) {
-        return {
-            success: false,
-            message: error
-        };
-    }
-}
 
 const userSignInService = async (userData) => {
     try {
@@ -188,7 +187,7 @@ const successfulLogin = async (searchedUser, loginType) => {
             updatedBy: searchedUser.id
         };
 
-        const verifyUserUpdate = await functionToUpdateUser(updateData, searchedUser.emailID, searchedUser.password);
+        const verifyUserUpdate = await functionToUpdateUser(updateData, searchedUser.id);
 
         console.log('Date:', new Date(), 'data return from function to update user:', verifyUserUpdate);
 
