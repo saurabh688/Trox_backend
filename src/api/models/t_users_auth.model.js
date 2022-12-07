@@ -1,4 +1,4 @@
-const { UUID, UUIDV4, STRING, BOOLEAN } = require('sequelize');
+const { UUID, UUIDV4, STRING, BOOLEAN, DATE } = require('sequelize');
 
 const sequelize = require('../db/db');
 
@@ -14,14 +14,15 @@ const UserAuth = sequelize.define('UserAuth', {
         allowNull: false
     },
     phoneNumber: {
-        type: STRING
+        type: STRING,
+        unique: true
     },
     emailID: {
         type: STRING,
-        allowNull: false,
         validate: {
             isEmail: true
-        }
+        },
+        unique: true
     },
     salt: {
         type: STRING
@@ -32,9 +33,8 @@ const UserAuth = sequelize.define('UserAuth', {
     uniqueToken: {
         type: STRING
     },
-    userType: {
-        type: STRING,
-        allowNull: false
+    verificationToken: {
+        type: STRING
     },
     status: {
         type: STRING,
@@ -43,6 +43,9 @@ const UserAuth = sequelize.define('UserAuth', {
     isDeleted: {
         type: BOOLEAN,
         defaultValue: false
+    },
+    expiresAt: {
+        type: DATE
     },
     created_by: {
         type: STRING

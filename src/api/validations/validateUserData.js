@@ -1,9 +1,11 @@
-const validateUserData = (userData) => {
-    const { firstName, lastName, phoneNumber, emailID, password, userType } = userData;
+const { VERIFY_EMAIL, VERIFY_PHONE } = require('../validations/validateEmailOrPhone');
 
-    if (!firstName || !lastName || !phoneNumber || !emailID || !password || !userType) return {
+const validateUserData = (userData) => {
+    const { firstName, lastName, emailID_or_phone, password } = userData;
+
+    if (!firstName || !lastName || !emailID_or_phone || !password) return {
         success: false,
-        message: "Please enter required fields for user sign-up, 'firstName', 'lastName', 'phoneNumber', 'emailID', 'password', 'userType'!"
+        message: "Please enter required fields for user sign-up, 'firstName', 'lastName', 'phoneNumber' or 'emailID', and 'password'!"
     };
 
     if (password.length < 8) {
@@ -13,10 +15,32 @@ const validateUserData = (userData) => {
         }
     }
 
-    return {
+    let verifyEmail = VERIFY_EMAIL(emailID_or_phone);
+    let verifyPhone = VERIFY_PHONE(emailID_or_phone);
+
+    if (!verifyEmail && !verifyPhone) return {
+        success: false,
+        message: 'Enter a valid Email Id or Phone Number'
+    }
+
+    if (!verifyEmail && verifyPhone) return {
         success: true,
         message: 'Required fields are provided!',
-        data: userData
+        data: {
+            ...userData,
+            phoneNumber: emailID_or_phone
+        },
+        uniqueIdentifier: 'PHONE'
+    };
+
+    if (!verifyPhone && verifyEmail) return {
+        success: true,
+        message: 'Required fields are provided!',
+        data: {
+            ...userData,
+            emailID: emailID_or_phone
+        },
+        uniqueIdentifier: 'EMAIL'
     };
 }
 

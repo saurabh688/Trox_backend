@@ -11,11 +11,11 @@ const User = sequelize.define("User", {
     },
     emailID: {
         type: STRING,
-        allowNull: false,
         validate: {
             isEmail: true,
         },
-        trim: true
+        trim: true,
+        unique: true
     },
     firstName: {
         type: STRING,
@@ -27,7 +27,8 @@ const User = sequelize.define("User", {
     },
     phoneNumber: {
         type: STRING,
-        trim: true
+        trim: true,
+        unique: true
     },
     countryCode: {
         type: STRING,
@@ -74,10 +75,6 @@ const User = sequelize.define("User", {
     },
     termsAndCondition: {
         type: BOOLEAN
-    },
-    userType: {
-        type: STRING,
-        allowNull: false
     },
     isF2A: {
         type: BOOLEAN,

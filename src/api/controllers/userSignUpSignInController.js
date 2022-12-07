@@ -1,4 +1,4 @@
-const { addUserService } = require('../services/userSignupService');
+const { addUserService, verifyOTPService, resendOTPService } = require('../services/userSignupService');
 const { userSignInService } = require('../services/userSigninService');
 const ErrorMessage = require('../../config/constants/ErrorMessage');
 
@@ -58,7 +58,39 @@ const userSignIn = async (req, res) => {
     }
 };
 
+const verifyOTP = async (req, res) => {
+    let verification = await verifyOTPService(req.body);
+
+    if (verification.success) {
+        res
+        .status(200)
+        .json(verification);
+    }
+    else {
+        res
+        .status(400)
+        .json(verification);
+    }
+};
+
+const resendOTP = async (req, res) => {
+    let resend = await resendOTPService(req.body);
+
+    if (resend.success) {
+        res
+        .status(200)
+        .json(resend);
+    }
+    else {
+        res
+        .status(400)
+        .json(resend);
+    }
+}
+
 module.exports = {
     userSignUp,
-    userSignIn
+    userSignIn,
+    verifyOTP,
+    resendOTP
 };

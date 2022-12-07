@@ -6,32 +6,40 @@ const User = require('../models/t_user.model');
 const validateUserData = require('../validations/validateUserData');
 const generateHash = require('../utils/generateHash');
 const { issueJWT, issueRefreshToken } = require('../utils/issueJWT');
+const transporter = require('../utils/mailer/transporter');
+const mailOptions = require('../utils/mailer/mailOptions');
+const verifyOtpDetails = require('../validations/verifyOtpDetails');
+const comparePassword = require('../utils/comparePassword');
+const validateResendOTPDetails = require('../validations/validateResendOTPDetails');
 
-const validateUserExist = async (phoneNumber, emailID) => {
+// Todo: remove userType
+// Todo: login through phone or emailId
+
+const validateUserExist = async (emailID_or_phone) => {
     try {
         let phoneOrEmailOfUserExist = await User.findAll({
             where: {
                 [Op.or]: [{
-                    phoneNumber: phoneNumber
+                    phoneNumber: emailID_or_phone
                 }, {
-                    emailID: emailID
+                    emailID: emailID_or_phone
                 }]
             }
         });
 
-        console.log("User Exist:", phoneOrEmailOfUserExist);
+        console.log('Date:', new Date(), "User Exist with phone or email:", phoneOrEmailOfUserExist);
 
         let phoneAndEmailOfUserExist = await User.findOne({
             where: {
                 [Op.and]: [{
-                    phoneNumber: phoneNumber
+                    phoneNumber: emailID_or_phone
                 }, {
-                    emailID: emailID
+                    emailID: emailID_or_phone
                 }]
             }
         });
 
-        console.log("User Exist:", phoneAndEmailOfUserExist);
+        console.log('Date:', new Date(), "User Exist with phone and email:", phoneAndEmailOfUserExist);
 
         if (phoneAndEmailOfUserExist != null) return {
             success: false,
@@ -40,7 +48,7 @@ const validateUserExist = async (phoneNumber, emailID) => {
 
         else if (phoneOrEmailOfUserExist.length > 0) {
             let phoneAlreadyExist = phoneOrEmailOfUserExist
-                .filter(user => user.dataValues.phoneNumber == phoneNumber)
+                .filter(user => user.dataValues.phoneNumber == emailID_or_phone)
                 .map(user => user);
 
             if (phoneAlreadyExist.length > 0) return {
@@ -92,7 +100,7 @@ const createNewUser = async (newUserData) => {
     }
 };
 
-const createNewUserAuth = async (newUserAuthData) => {
+const createNewUserAuth = async (newUserAuthData, uniqueIdentifier, userStatus) => {
     try {
         let newUserAuth = await UserAuth.create(newUserAuthData);
         console.log("Date:", new Date(), "New User Auth created:", newUserAuth.dataValues);
@@ -112,10 +120,203 @@ const createNewUserAuth = async (newUserAuthData) => {
             };
         }
 
+        if (uniqueIdentifier == 'EMAIL' && userStatus == 'inactive') {
+            let sendOTP = await sendOTPVerificationEmail(newUserAuthData.userId, newUserAuthData.emailID);
+            console.log('Date:', new Date(), 'Send otp response:', sendOTP);
+            if (!sendOTP.success) return sendOTP;
+        }
+
         return {
             success: true,
-            message: 'User Auth created!',
+            message: 'User Auth created and OTP sent!',
             data: newUserAuth.dataValues
+        }
+    }
+    catch (error) {
+        return {
+            success: false,
+            message: error
+        };
+    };
+};
+
+const sendOTPVerificationEmail = async (userId, emailID) => {
+    try {
+        const otp = `${Math.floor(1000 + Math.random() * 9000)}`;
+        let mailOp = mailOptions(emailID, otp);
+
+        const hashedOTP = await generateHash(otp);
+
+        let updateValue = {
+            verificationToken: hashedOTP.HASH,
+            expiresAt: Date.now() + 600000
+        };
+
+        const updateUserAuth = await UserAuth.update(updateValue, {
+            returning: true,
+            where: { userId: userId }
+        });
+
+        if (updateUserAuth[1] == 0) {
+            let deleteNewUser = await User.destroy({
+                where: {
+                    id: newUserAuthData.userId
+                }
+            });
+
+            let deleteNewUserAuth = await UserAuth.destroy({
+                where: {
+                    emailID: emailID
+                }
+            });
+
+            console.log('Date:', new Date(), "Delete new user:", deleteNewUser);
+            console.log('Date:', new Date(), "Delete new user auth:", deleteNewUserAuth);
+
+            return {
+                success: false,
+                message: 'Could not update otp and expiresAt'
+            };
+        }
+
+        const sendOtpMail = await transporter.sendMail(mailOp);
+        console.log('Date:', new Date(), 'Send otp mail response:', sendOtpMail);
+
+        if (sendOtpMail.accepted.length == 0) return {
+            success: false,
+            message: 'Could not send OTP!'
+        }
+
+        return {
+            success: true,
+            message: 'OTP sent'
+        }
+    }
+    catch (error) {
+        return {
+            success: false,
+            message: error
+        }
+    }
+}
+
+const verifyAuthDetails = async (userId) => {
+    try {
+        let searchUser = await UserAuth.findOne({
+            where: { userId }
+        });
+
+        if (!searchUser) return {
+            success: false,
+            message: 'User does not exist!'
+        }
+
+        let expireDate = searchUser.dataValues.expiresAt;
+        let hashedOTP = searchUser.dataValues.verificationToken;
+        let uniqueToken = searchUser.dataValues.uniqueToken;
+
+        return {
+            success: true,
+            message: 'Auth details verified!',
+            data: {
+                expiresAt: expireDate,
+                storedOTP: hashedOTP,
+                uniqueToken: uniqueToken
+            }
+        };
+    }
+    catch (error) {
+        return {
+            success: false,
+            message: error
+        }
+    }
+}
+
+const validateOTPExpired = async (userId, expireDate) => {
+    try {
+        // otp expired
+        if (expireDate < Date.now()) {
+            let updateAuth = await updateUserAuthTable(userId);
+
+            return updateAuth;
+        }
+
+        return {
+            success: true,
+            message: 'OTP has not expired!'
+        }
+    }
+    catch (error) {
+        return {
+            success: false,
+            message: error
+        }
+    }
+}
+
+const verifyOTP = async (OTP, hashedOTP) => {
+    try {
+        let compareOTP = await comparePassword(OTP, hashedOTP);
+
+        if (!compareOTP.success) return {
+            success: false,
+            message: 'Invalid code passed. Check your inbox!'
+        }
+
+        return {
+            success: true,
+            message: 'OTP verified!'
+        }
+    }
+    catch (error) {
+        return {
+            success: false,
+            message: error
+        };
+    };
+};
+
+const updateUserTable = async (userId) => {
+    try {
+        let updateUserTable = await User.update({ status: 'active' }, {
+            returning: true,
+            where: { id: userId }
+        });
+
+        if (updateUserTable[1] == 0) return {
+            success: false,
+            message: 'Could not update user status!'
+        }
+
+        return {
+            success: true,
+            message: 'OTP verified!'
+        }
+    }
+    catch (error) {
+        return {
+            success: false,
+            message: error
+        }
+    }
+};
+
+const updateUserAuthTable = async (userId) => {
+    try {
+        let updateUserAuth = await UserAuth.update({ expiresAt: null, verificationToken: null }, {
+            returning: true,
+            where: { userId }
+        });
+
+        if (updateUserAuth[1] == 0) return {
+            success: false,
+            message: 'Expires At and verificationToken could not be updated!'
+        };
+
+        return {
+            success: true,
+            message: 'Expires At and verificationToken deleted!'
         }
     }
     catch (error) {
@@ -129,20 +330,23 @@ const createNewUserAuth = async (newUserAuthData) => {
 const addUserService = async (userData) => {
     try {
 
-        let { firstName, lastName, phoneNumber, emailID, password, userType } = userData;
+        let { emailID_or_phone, password } = userData;
 
         let checkUserData = validateUserData(userData);
         console.log("Date:", new Date(), "validate if user data are provided:", checkUserData);
 
         if (!checkUserData.success) return checkUserData;
 
-        let checkUserExist = await validateUserExist(phoneNumber, emailID);
+        let checkUserExist = await validateUserExist(emailID_or_phone);
         console.log("Date:", new Date(), "validate if user exist:", checkUserExist);
 
         if (!checkUserExist.success) return checkUserExist;
 
-        let newUserData = { firstName, lastName, phoneNumber, emailID, userType };
+        let newUserData = checkUserData.data;
         console.log("Date:", new Date(), "Data for t_user table:", newUserData);
+
+        let uniqueIdentifier = checkUserData.uniqueIdentifier;
+        console.log("Date:", new Date(), "Unique identifier for registration:", uniqueIdentifier);
 
         let newUser = await createNewUser(newUserData);
         console.log("Date:", new Date(), "New user created:", newUser);
@@ -158,19 +362,19 @@ const addUserService = async (userData) => {
         const uniqueToken = randomToken.uid(255);
         console.log("Date:", new Date(), "Unique Token:", uniqueToken);
 
-        let newUserAuthData = { userId: newUser.data.id, phoneNumber, emailID, userType, salt: SALT, password: HASH, uniqueToken };
+        let userTableStatus = newUser.data.status
+
+        let newUserAuthData = uniqueIdentifier == 'PHONE' ? 
+        { userId: newUser.data.id, phoneNumber: emailID_or_phone, salt: SALT, password: HASH, uniqueToken} : 
+        { userId: newUser.data.id, emailID: emailID_or_phone, salt: SALT, password: HASH, uniqueToken};
         console.log("Date:", new Date(), "Data for t_user_auth table:", newUserAuthData);
 
-        let newUserAuth = await createNewUserAuth(newUserAuthData);
+        let newUserAuth = await createNewUserAuth(newUserAuthData, uniqueIdentifier, userTableStatus);
         console.log("Date:", new Date(), "New User auth created:", newUserAuth);
 
         if (!newUserAuth.success) return newUserAuth;
 
         const user = newUser.data;
-        const userAuth = newUserAuth.data;
-
-        const tokenObject = issueJWT(user.id);
-        const refreshTokenObject = issueRefreshToken(user.id, userAuth.uniqueToken);
 
         const returnPayload = {
             id: user.id,
@@ -178,15 +382,11 @@ const addUserService = async (userData) => {
             lastName: user.lastName,
             phoneNumber: user.phoneNumber,
             emailId: user.emailID,
-            userType: userAuth.userType,
-            status: userAuth.status,
-            accessToken: tokenObject.token,
-            refreshTokenObject: refreshTokenObject.token
         }
 
         return {
             success: true,
-            message: 'User registered!',
+            message: 'Verify using otp sent in email!',
             data: returnPayload
         };
     }
@@ -198,6 +398,87 @@ const addUserService = async (userData) => {
     };
 };
 
+const verifyOTPService = async (userData) => {
+    try {
+        let { userId, otp } = userData;
+
+        let verifyDetails = verifyOtpDetails(userId, otp);
+
+        if (!verifyDetails.success) return verifyDetails;
+
+        let getAuthDetails = await verifyAuthDetails(userId);
+
+        if (!getAuthDetails.success) return getAuthDetails;
+
+        let expiresAt = getAuthDetails.data.expiresAt;
+        let storedOTP = getAuthDetails.data.storedOTP;
+        let uniqueToken = getAuthDetails.data.uniqueToken;
+
+        const verifyOTPExpiry = await validateOTPExpired(userId, expiresAt);
+
+        if (!(verifyOTPExpiry.success && verifyOTPExpiry.message == 'OTP has not expired!')) return verifyOTPExpiry;
+
+        let validateOTP = await verifyOTP(otp, storedOTP);
+
+        if (!validateOTP.success) return validateOTP;
+
+        let updateUser = await updateUserTable(userId);
+
+        if (!updateUser.success) return updateUser;
+
+        const tokenObject = issueJWT(userId);
+        const refreshTokenObject = issueRefreshToken(userId, uniqueToken);
+
+        return {
+            success: true,
+            message: 'User email has been verified!',
+            data: {
+                id: userId,
+                accessToken: tokenObject.token,
+                refreshTokenObject: refreshTokenObject.token,
+                status: 'active'
+            }
+        };
+    }
+    catch (error) {
+        return {
+            success: false,
+            message: error
+        };
+    };
+};
+
+const resendOTPService = async (userData) => {
+    try {
+        let { userId, emailId } = userData;
+
+        const validateResendDetails = validateResendOTPDetails(userId, emailId);
+
+        if (!validateResendDetails.success) return validateResendDetails;
+
+        let updateAuth = await updateUserAuthTable(userId);
+
+        if (!updateAuth.success) return updateAuth;
+
+        let sendOTP = await sendOTPVerificationEmail(userId, emailId);
+        console.log('Date:', new Date(), 'Send otp response:', sendOTP);
+        if (!sendOTP.success) return sendOTP;
+
+        return {
+            success: true,
+            message: 'OTP has been resent!'
+        }
+    }
+    catch (error) {
+        return {
+            success: false,
+            message: error
+        }
+    }
+}
+
 module.exports = {
-    addUserService
+    addUserService,
+    verifyOTPService,
+    resendOTPService
 }

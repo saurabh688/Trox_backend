@@ -5,18 +5,19 @@ const User = require('../models/t_user.model');
 const UserAuth = require('../models/t_users_auth.model');
 const comparePassword = require('../utils/comparePassword');
 
+const { VERIFY_EMAIL, VERIFY_PHONE } = require('../validations/validateEmailOrPhone');
+
 // Todo: issue JWT, refreshToken
 const { issueJWT, issueRefreshToken } = require('../utils/issueJWT'); 
 
 // Todo: decode JWT.
 const { decodeRefreshToken } = require('../utils/decodeJWT');
 
-
-const functionToVerifyRequiredDetails = (emailID, password) => {
-    if (!emailID) {
+const functionToVerifyRequiredDetails = (emailID_or_phone, password) => {
+    if (!emailID_or_phone) {
         return {
             success: false,
-            message: 'Please enter your email ID!'
+            message: 'Please enter your email ID or phone number!'
         }
     }
 
@@ -27,7 +28,24 @@ const functionToVerifyRequiredDetails = (emailID, password) => {
         }
     }
 
-    else {
+    let verifyEmail = VERIFY_EMAIL(emailID_or_phone);
+    let verifyPhone = VERIFY_PHONE(emailID_or_phone);
+
+    if (!verifyEmail && !verifyPhone) {
+        return {
+            success: false,
+            message: 'You email or phone number is invalid!'
+        }
+    }
+
+    if (!verifyEmail && verifyPhone) {
+        return {
+            success: true,
+            message: 'Required details provided!'
+        }
+    }
+
+    if (!verifyPhone && verifyEmail) {
         return {
             success: true,
             message: 'Required details provided!'
@@ -35,11 +53,18 @@ const functionToVerifyRequiredDetails = (emailID, password) => {
     }
 }
 
-const validateRegisteredUser = async (emailID, password) => {
+const validateRegisteredUser = async (emailIdOrPhone, password) => {
     try {
         let userAuthDetails = await UserAuth.findOne({
             where: {
-                emailID: emailID
+                [Op.or]: [
+                    {
+                        emailID: emailIdOrPhone
+                    },
+                    {
+                        phoneNumber: emailIdOrPhone
+                    }
+                ]
             }
         });
 
@@ -147,9 +172,9 @@ const userSignInService = async (userData) => {
     try {
         console.log('Date:', new Date(), 'Data received from controller:', userData);
 
-        const { emailID, password } = userData;
+        const { emailID_or_phone, password } = userData;
 
-        const verifyDetails = functionToVerifyRequiredDetails(emailID, password);
+        const verifyDetails = functionToVerifyRequiredDetails(emailID_or_phone, password);
 
         console.log('Date:', new Date(), 'Verification of details provided:', verifyDetails);
 
@@ -157,7 +182,7 @@ const userSignInService = async (userData) => {
 
         console.log('Date:', new Date(), '-------------> Next step <-------------');
 
-        let verifyIfRegistered = await validateRegisteredUser(emailID, password);
+        let verifyIfRegistered = await validateRegisteredUser(emailID_or_phone, password);
 
         console.log('Date:', new Date(), 'Registered user details:', verifyIfRegistered);
 
@@ -211,6 +236,7 @@ const successfulLogin = async (searchedUser, loginType) => {
             returnData = {
                 id: searchedUser.id,
                 emailID: searchedUser.emailID,
+                phoneNumber: searchedUser.phoneNumber,
                 status: searchedUser.status,
                 isDeleted: searchedUser.isDeleted,
                 accessToken: tokenObject.token,
