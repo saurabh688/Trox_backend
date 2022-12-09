@@ -1,4 +1,5 @@
 const { Op } = require('sequelize')
+const XLSX = require('xlsx');
 
 // DB model import.
 const Product = require('../models/t_product.model');
@@ -78,7 +79,7 @@ const functionToVerifyProductDetails = (listOfProductDetails) => {
 }
 
 // * Function to add in bulk list of products in db
-const functionToAddProductInBulk = async (verifiedProductDetailsList) => {
+const   functionToAddProductInBulk = async (verifiedProductDetailsList) => {
     try {
         let createProductsList = await Product.bulkCreate(verifiedProductDetailsList);
 
@@ -548,6 +549,30 @@ const searchProductService = async (value) => {
         }
     }
 } 
+
+const parseExcelAndAddProductService = async (arrayBuffer) => {
+    try {
+        let workBook = XLSX.read(arrayBuffer, { cellDates: true });
+        let listOfProducts = [];
+
+        for (let index = 0; index < workBook.SheetNames.length; index++) {
+            let productObject = {};
+            let sheetNames = workBook.SheetNames[index];
+            let workSheet = workBook.Sheets[sheetNames];
+            let data = XLSX.utils.sheet_to_json(workSheet);
+            let productData = data[index];
+
+            
+        }
+
+    }
+    catch (error) {
+        return {
+            success: false,
+            message: error
+        }
+    }
+}
 
 module.exports = {
     viewAllProductService,

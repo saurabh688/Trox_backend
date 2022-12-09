@@ -55,6 +55,25 @@ const functionToVerifyRequiredDetails = (emailID_or_phone, password) => {
 
 const validateRegisteredUser = async (emailIdOrPhone, password) => {
     try {
+        let validateUserStatus = await User.findOne({
+            where: {
+                [Op.and]: [
+                    {
+                        [Op.or]: [
+                            { emailID: emailIdOrPhone },
+                            { phoneNumber: emailIdOrPhone }
+                        ]
+                    },
+                    { status: 'active' }
+                ]
+            }
+        });
+
+        if (!validateUserStatus) return {
+            success: false,
+            message: 'User does not exist or user has not verified email or phone number!'
+        }
+
         let userAuthDetails = await UserAuth.findOne({
             where: {
                 [Op.or]: [
