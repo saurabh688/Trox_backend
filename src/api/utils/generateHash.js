@@ -12,7 +12,7 @@ const generateSalt = async (SALT_ROUND) => {
 // console.log("Date:", new Date(), "Generated salt:", generateSalt);
 
 // * function to generate hashed password using bcrypt.js
-const generateHash = async (password='secret') => {
+const generateHash = async (password) => {
     const salt = await generateSalt(SALT_ROUND);
     const hash = await bcrypt.hash(password, salt);
     console.log('Date:', new Date(), 'Hashed password in generateHash function:', hash);

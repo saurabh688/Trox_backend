@@ -1,11 +1,11 @@
 const { VERIFY_EMAIL, VERIFY_PHONE } = require('../validations/validateEmailOrPhone');
 
 const validateUserData = (userData) => {
-    const { firstName, lastName, emailID_or_phone, password } = userData;
+    const { fullName, emailID_or_phone, password } = userData;
 
-    if (!firstName || !lastName || !emailID_or_phone || !password) return {
+    if (!fullName || !emailID_or_phone || !password) return {
         success: false,
-        message: "Please enter required fields for user sign-up, 'firstName', 'lastName', 'phoneNumber' or 'emailID', and 'password'!"
+        message: "Please enter required fields for user sign-up, 'fullName', 'lastName', 'phoneNumber' or 'emailID', and 'password'!"
     };
 
     if (password.length < 8) {

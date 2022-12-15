@@ -17,11 +17,7 @@ const User = sequelize.define("User", {
         trim: true,
         unique: true
     },
-    firstName: {
-        type: STRING,
-        trim: true
-    },
-    lastName: {
+    fullName: {
         type: STRING,
         trim: true
     },

@@ -378,8 +378,7 @@ const addUserService = async (userData) => {
 
         const returnPayload = {
             id: user.id,
-            firstName: user.firstName,
-            lastName: user.lastName,
+            fullName: user.fullName,
             phoneNumber: user.phoneNumber,
             emailId: user.emailID,
         }

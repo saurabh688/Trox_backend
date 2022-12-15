@@ -2,6 +2,9 @@ const { UUID, UUIDV4, STRING, BOOLEAN, REAL, INTEGER, TEXT, ARRAY } = require('s
 
 const sequelize = require('../db/db');
 
+
+// Product mapping table => foreign_key = parent_SKU
+
 const Product = sequelize.define('Product', {
     id: {
         type: UUID,
