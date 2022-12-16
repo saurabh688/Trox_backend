@@ -415,7 +415,12 @@ const verifyOTPService = async (userData) => {
 
         const verifyOTPExpiry = await validateOTPExpired(userId, expiresAt);
 
-        if (!(verifyOTPExpiry.success && verifyOTPExpiry.message == 'OTP has not expired!')) return verifyOTPExpiry;
+        console.log('Verify OTP expiry:', verifyOTPExpiry);
+
+        if (!(verifyOTPExpiry.success && verifyOTPExpiry.message == 'OTP has not expired!')) return {
+            success: false,
+            message: verifyOTPExpiry.message
+        };
 
         let validateOTP = await verifyOTP(otp, storedOTP);
 

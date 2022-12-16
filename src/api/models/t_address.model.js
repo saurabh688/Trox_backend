@@ -12,15 +12,11 @@ const Address = sequelize.define('Address', {
     userId: {
         type: STRING,
     },
-    emailAddress: {
+    emailId: {
         type: STRING,
         allowNull: false
     },
-    firstName: {
-        type: STRING,
-        allowNull: false
-    },
-    lastName: {
+    fullName: {
         type: STRING,
         allowNull: false
     },
@@ -36,8 +32,7 @@ const Address = sequelize.define('Address', {
         allowNull: false
     },
     county: {
-        type: STRING,
-        allowNull: false
+        type: STRING
     },
     postalCode: {
         type: INTEGER,
@@ -71,10 +66,10 @@ const Address = sequelize.define('Address', {
         type: BOOLEAN,
         defaultValue: false
     },
-    created_by: {
+    createdBy: {
         type: STRING
     },
-    modified_by: {
+    modifiedBy: {
         type: STRING
     }
 });
