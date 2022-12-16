@@ -19,10 +19,25 @@ const addOrder = async (req, res) => {
         .status(404)
         .json(order);
     }
+    else if (!order.success) {
+        res
+        .status(400)
+        .json(order);
+    }
 };
 
 const getOrder = async (req, res) => {
+    let order = await getOrderService(req.headers.authorization);
 
+    if (order.success) {
+        res
+        .status(200)
+        .json(order);
+    } else {
+        res
+        .status(400)
+        .json(order);
+    }
 };
 
 module.exports = {

@@ -86,7 +86,7 @@ const   functionToAddProductInBulk = async (verifiedProductDetailsList) => {
         console.log(new Date(), "New products added response:", createProductsList);
 
         // * if no item was added return error message.
-        if (createProductsList.length < 0) {
+        if (createProductsList.length < 1) {
             return {
                 success: false,
                 message: 'Could not add any product!'

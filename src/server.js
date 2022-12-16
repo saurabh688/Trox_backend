@@ -20,7 +20,7 @@ const sequelize = require('./api/db/db');
 const userSignUpSignInRouter = require('./api/routes/userSignUpSignIn');
 const productRouter = require('./api/routes/product');
 const cartRouter = require('./api/routes/cart');
-// const orderRouter = require('./api/routes/order');
+const orderRouter = require('./api/routes/order');
 
 // * Initialize express App.
 
@@ -59,7 +59,7 @@ app.get("/", (req, res) => {
 app.use(API_VERSION, userSignUpSignInRouter);
 app.use(API_VERSION, productRouter);
 app.use(API_VERSION, cartRouter);
-// app.use(API_VERSION, orderRouter);
+app.use(API_VERSION, orderRouter);
 
 // * Use PORT to establish connection with the server.
 app.listen(PORT, () => {

@@ -23,6 +23,10 @@ const Cart = sequelize.define('Cart', {
         type: STRING,
         trim: true
     },
+    productId: {
+        type: STRING,
+        trim: true
+    },
     category: {
         type: STRING,
         trim: true

@@ -1,4 +1,4 @@
-const { UUID, UUIDV4, STRING, BOOLEAN, DATE, DOUBLE } = require('sequelize');
+const { UUID, UUIDV4, STRING, DATE, DOUBLE, BOOLEAN } = require('sequelize');
 
 const sequelize = require('../db/db');
 
@@ -20,10 +20,6 @@ const Order = sequelize.define('Order', {
     orderStatus: {
         type: STRING,
         defaultValue: 'PENDING',
-        allowNull: false
-    },
-    sellerId: {
-        type: STRING,
         allowNull: false
     },
     paymentMethod: {
@@ -89,80 +85,77 @@ const Order = sequelize.define('Order', {
         allowNull: false
     },
     totalTaxPrice: { 
-        type: Number, 
+        type: DOUBLE, 
         defaultValue: 0.0, 
         allowNull: false
     },
     totalShippingPrice: {
-        type: Number,
+        type: DOUBLE,
         defaultValue: 0.0,
         allowNull: false
     },
     totalShippingTaxPrice: {
-        type: Number,
+        type: DOUBLE,
         defaultValue: 0.0,
         allowNull: false
     },
     totalGiftOptionPrice: {
-        type: Number,
+        type: DOUBLE,
         defaultValue: 0.0,
         allowNull: false
     },
     totalGiftOptionTaxPrice: {
-        type: Number,
+        type: DOUBLE,
         defaultValue: 0.0,
         allowNull: false
     },
     vatInclusive: { 
-        type: Boolean, 
+        type: BOOLEAN, 
         defaultValue: false 
     },
     totalOrderDiscount: { 
-        type: Number 
+        type: DOUBLE 
     },
     totalShippingDiscount: { 
-        type: Number 
-    },
-    items: { 
-        type: Array 
+        type: DOUBLE 
     },
     specialInstructions: { 
-        type: String 
+        type: STRING 
     },
     privateNotes: { 
-        type: String 
+        type: STRING 
     },
     paymentTransactionID: { 
-        type: String 
+        type: STRING 
     },
     siteSourceID: { 
-        type: Number 
+        type: DOUBLE 
     },
     secondaryOrderID: { 
-        type: String 
+        type: STRING 
     },
     tags: { 
-        type: String 
+        type: STRING 
     },
     facilitatedTax: { 
-        type: Boolean, 
+        type: BOOLEAN, 
         defaultValue: false 
     },
     mustShipByDateUTC: { 
-        type: String 
+        type: STRING 
     },
     dcCode: { 
-        type: String 
+        type: STRING 
     },
     refundID: { 
-        type: String 
+        type: STRING 
     },
     subscriptionId: { 
-        type: String, 
+        type: STRING, 
         defaultValue: null 
     },
     checkoutId: { 
-        type: String, 
+        type: STRING, 
         defaultValue: null 
     },
     created_by: {

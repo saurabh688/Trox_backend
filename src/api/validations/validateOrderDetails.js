@@ -1,17 +1,17 @@
 const validateOrderDetails = (data) => {
-    let { sellerId, shippingAddress, totalPrice, totalSellerAmount } = data;
+    let { userId, buyerAddress, shippingAddress, totalPrice, totalSellerAmount, itemArr } = data;
 
-    if (!sellerId || !shippingAddress || !totalPrice || !totalSellerAmount) return {
+    if (!userId || !buyerAddress  || !shippingAddress || !totalPrice || !totalSellerAmount || itemArr.length == 0) return {
         success: false,
-        message: "Please provide all required details, required details: 'Seller ID', 'Shipping Address', 'Total Price', 'Total Seller Amount'"
+        message: "Please provide all required details, required details: 'Seller ID', 'Item Array', 'Buyer Address', 'Shipping Address', 'Total Price', 'Total Seller Amount'"
     };
 
-    if (isNaN(totalPrice)) return {
+    if (!(typeof totalPrice == 'number')) return {
         success: false,
         message: 'Total price should be a real number!'
     }
 
-    if (isNaN(totalSellerAmount)) return {
+    if (!(typeof totalSellerAmount == 'number')) return {
         success: false,
         message: 'Total seller amount should be a real number!'
     }
