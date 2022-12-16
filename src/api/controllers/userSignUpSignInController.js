@@ -1,5 +1,6 @@
 const { addUserService, verifyOTPService, resendOTPService } = require('../services/userSignupService');
 const { userSignInService } = require('../services/userSigninService');
+const { getUserService } = require('../services/userService');
 const ErrorMessage = require('../../config/constants/ErrorMessage');
 
 const userSignUp = async (req, res) => {
@@ -85,6 +86,21 @@ const resendOTP = async (req, res) => {
         res
         .status(400)
         .json(resend);
+    };
+};
+
+const getUser = async (req, res) => {
+    let user = await getUserService(req.headers.authorization);
+
+    if (user.success) {
+        res
+        .status(200)
+        .json(user);
+    }
+    else if (!user.success) {
+        res
+        .status(400)
+        .json(user);
     }
 }
 
@@ -92,5 +108,6 @@ module.exports = {
     userSignUp,
     userSignIn,
     verifyOTP,
-    resendOTP
+    resendOTP,
+    getUser
 };
