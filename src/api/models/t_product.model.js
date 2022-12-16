@@ -157,7 +157,6 @@ const Product = sequelize.define('Product', {
 }, {
     indexes: [
         {
-            unique: true,
             fields: ['title', 'description', 'brand']
         }
     ]
